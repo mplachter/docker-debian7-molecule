@@ -14,6 +14,7 @@ RUN apt-get -y update \
       sudo \
       apt-transport-https \
       curl \
+      upstart \
       vim \
       wget \
  && apt-get clean all
