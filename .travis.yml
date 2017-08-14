@@ -1,0 +1,30 @@
+---
+sudo: required
+
+services: docker
+
+env:
+  DOCKER_COMPOSE_VERSION: 1.14.0
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+
+script:
+  # build docker file
+  - docker build -t docker-molecule .
+
+  # run docker file
+  - docker run --name test-molecule-container -d --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro docker-molecule
+
+  # Verify which, rsync, and netstat were installed on the image
+  - docker exec --tty test-molecule-container env TERM=xterm rsync --version
+  - docker exec --tty test-molecule-container env TERM=xterm netstat
+
+
+after_success:
+  - "curl -H 'Content-Type: application/json' --data '{'source_type': 'Branch', 'source_name': 'master'}' -X POST ${Docker_Trigger_URL}"
