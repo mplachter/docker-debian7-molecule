@@ -2,10 +2,12 @@ FROM debian:7
 LABEL maintainer="Matt Plachter"
 ENV container=docker
 
+RUN rm /sbin/initctl
+RUN dpkg-divert --local --rename --remove /sbin/initctl
 
 # Install requirements.
-RUN apt-get -y update \
- && apt-get -y install \
+RUN apt-get -y update
+RUN apt-get -y install \
       apt-utils \
       initscripts \
       rsync \
@@ -14,7 +16,6 @@ RUN apt-get -y update \
       sudo \
       apt-transport-https \
       curl \
-      upstart \
       vim \
       wget \
  && apt-get clean all
